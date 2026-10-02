@@ -62,3 +62,64 @@ class FPOManager:
 
   def get_crop_category(self,crop):
     return CROP_CATEGORY.get(crop.lower(),"Other")
+
+    def export_clean_json(self, filepath):
+      import json
+      clean = []
+      for m in self.members:
+          clean.append({
+              "id": m.id,
+              "name": m.name,
+              "land_acre": m.land_acre,
+              "crop": m.crop,
+              "phone_hash": hash(m.phone),  # DPDP: hash not phone
+              "join_date": m.join_date,
+              "dues": m.dues,
+              "consent_otp_verified": m.consent_otp_verified
+          })
+      with open(filepath, 'w') as f:
+          json.dump(clean, f, indent=2)
+      print(f"Exported {len(clean)} to {filepath} — bureau input W20")
+
+if __name__ == "__main__":
+  import argparse
+  parser = argparse.ArgumentParser(prog = 'KuberSetu OS')
+   parser.add_argument('--import', dest='import_file', help='Import members.csv')
+    parser.add_argument('--import-tally-zip', dest='tally_zip', help='Import Tally zip (offline-first)')
+    parser.add_argument('--export', dest='export_file', help='Export clean.json with phone_hash DPDP')
+    parser.add_argument('--search', help='Search by crop e.g., ragi')
+    parser.add_argument('--filter-land', type=float, help='Filter land > acres e.g., 2')
+    parser.add_argument('--dues', action='store_true', help='Show dues report')
+
+    args = parser.parse_args()
+    manager = FPOManager()
+
+  if args.search:
+        results = manager.search_by_crop(args.search)
+        print(f"\n Found {len(results)} farmers with crop {args.search}:")
+        for m in results:
+            print(f"  {m.id}: {m.name} — {m.land_acre} acre {m.crop}")
+
+    if args.filter_land:
+        results = manager.filter_land_greater_than_2_acres()
+        # For generic filter, use float comparison
+        filtered = [m for m in manager.members if float(m.land_acre) > args.filter_land]
+        print(f"\n Found {len(filtered)} farmers with land > {args.filter_land} acre:")
+        for m in filtered:
+            print(f"  {m.id}: {m.name} — {m.land_acre} acre")
+
+    if args.dues:
+        total = manager.dues_report()
+        print(f"\n Dues Report: Total ₹{total}")
+
+    if args.export_file:
+        manager.export_clean_json(args.export_file)
+
+    if not any(vars(args).values()):
+        print("No args, running demo with members_v2.csv...\n")
+        manager.load_csv("members_v2.csv")
+        print(f"Loaded {len(manager.members)} members")
+        print(f"Search ragi: {len(manager.search_by_crop('ragi'))}")
+        print(f"Dues: ₹{manager.dues_report()}")
+        manager.export_clean_json("clean.json")
+
