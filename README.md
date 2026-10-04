@@ -1,94 +1,161 @@
 # KuberSetuOS — Universal Village FPO OS
 
 > **Kuber** = God of Wealth/Treasury/Credit + **Setu** = Bridge + **OS** = Operating System  
-> **One-line wedge:** We help FPOs sell aggregated crops to verified buyers at better execution terms — price+quality+truck+payment tracking — via WhatsApp voice Kannada
+> **One-line wedge:** We help FPOs sell aggregated crops to verified buyers at better execution terms — price+quality+truck+payment tracking — via WhatsApp voice Kannada<br>
+>**Writer:** Venkateswaran A G<br>
+>**Theme:** Kisan / FPO OS — One product for every village
 
-![Progress](https://img.shields.io/badge/Progress-1%2F24%20Weeks-brightgreen) ![Version](https://img.shields.io/badge/V14-Foundation-blue) ![HR](https://img.shields.io/badge/HR%20Target-15--25%20LPA-orange)
+---
 
-## 30-Second Answer Flow (for HR / Farmer)
-1. **FPO Secretary** (feature phone) → Field officer proxy imports `members.csv` / Tally zip via CLI `--import`
-2. **Farmer** → WhatsApp voice Kannada: "Ragi 2 quintal sell?" → STT → intent
-3. **OS** → Quality grading photo + crop category dict (ragi→Millets) + verified profile 0-100 + fraud check (circular trading graph + price outlier)
-4. **Buyer** → Verified buyer list + execution terms: price+quality+truck+eWayBill+Bank AA payment tracking
-5. **Transaction** → 1% monetization, payment tracked, dispute flow, SMS loop to farmer: "₹2400/quintal truck tomorrow"
-6. **Offline-first** → No internet 2 days? `offline_queue.json` retry, GGUF offline, IVR/SMS fallback, KVK CAC ₹2k assisted onboarding not self-serve
+## Problem Statement
 
-## Why This Wins (Real Pain from Research)
-- Karnataka maize MSP ₹2400 vs market ₹1600-1800, moong MSP ₹8768 vs ₹5400, 32 lakh MT surplus, ethanol plants bypass farmers → need direct FPO procurement
-- Price volatility 2x in year (mustard/peppermint), MSP not accessible, transport corruption, cold storage owned by big firms, 60-70% small/marginal produce, trust + ROI matters more than tech, need WhatsApp/voice
-- **Universal Village Ready:** smartphone 4G real-time, 2G queued retry, feature phone via field officer proxy + IVR/SMS
+Small and marginal farmers (60-70% of produce) face:
 
-## V14 → V17 iPhone Model (ONE Product Layered)
-- **V14 Foundation (W1-W6):** Member organizer CLI offline-first, DPDP phone_hash, bureau input W20 clean.json → verified profile 0-100 PDF shareable not CIBIL premature, quality grading + eWayBill, WhatsApp voice Kannada
-- **V15 RAG Core (W7-W12):** Scheme RAG + Compliance RAG prototype (deleted 70% business model for MVP), VectorDB Pinecone/FAISS, cost/latency metrics, 3 MCPs wedge (crop_price, buyer_verify, truck), 3 agents hidden CrewAI (grader, fraud, payment)
-- **V16 Transaction (W13-W18):** Executable transaction 1%, Bank AA payment tracking + dispute, fraud detection circular trading graph + price outlier, RAG eval faithfulness 0.62→0.85, FastAPI + Docker + Cloud live URL, Tool-calling fluency
-- **V17 Scale (W19-W24):** GGUF offline llama.cpp, MLOps PyTorch/HF, SQL + DSA scale 10k FPOs, cost <₹0.50/txn latency <2s, DPDP audit, live URLs, HR 15-25 LPA story, monetization 1% live, KVK CAC ₹2k
+- **MSP not accessible:** Karnataka maize MSP ₹2400 vs market ₹1600-1800, moong MSP ₹8768 vs ₹5400, 32 lakh MT surplus, ethanol plants bypass farmers
+- **Price volatility:** 2x in a year (mustard, peppermint), no farm-to-table linkage
+- **Trust & logistics:** Transport corruption, cold storage owned by big firms, no quality grading, no payment tracking
+- **Digital divide:** Smartphone 4G in town, 2G or no internet in village for 2 days, feature phone users need proxy, need WhatsApp voice Kannada not English app
+- **Data mess:** FPO secretary has Tally zip / CSV with missing land, duplicate ids, no consent tracking, phone numbers stored as plain text (DPDP violation)
 
-## 30+ Skills Used Across V14→V17 (HR 15-25 LPA Signal)
-`Python, OOP, argparse, CSV, Pandas, SQL, DSA, Git, FastAPI, RAG, Pinecone/FAISS, VectorDB, LLM APIs, Prompt Eng, LangChain, CrewAI, PyTorch/HF, Docker, K8s, Cloud, MLOps, Eval literacy (faithfulness), Cost modeling, Tool-calling fluency, Failure-mode intuition, GGUF offline, STT/TTS Kannada, WhatsApp API, IVR/SMS, Bank AA, eWayBill API, Graph DB NetworkX, Fraud detection, ROC-AUC`
+Result: FPO cannot aggregate and sell at better price, farmer gets low price.
 
-## Validated / Prototype / Hypothesis / Future Vision
-- **Validated (W1-W2):** FPO CLI offline-first, clean.json bureau input, profile 0-100 ROC-AUC 0.78 baseline
-- **Prototype (W3-W6):** Quality grading photo, eWayBill, WhatsApp voice, payment tracking, Scheme RAG prototype
-- **Hypothesis (W7-W12):** Fraud graph, 3 MCPs, CrewAI 3 agents, cost/latency, eval 0.85
-- **Future Vision (W13-W24):** GGUF offline, live URLs, 1% monetization, KVK scale, 10k FPOs
+## Solution
 
-## Live URLs (Auto-updated)
-- **Demo CLI:** `python week1/starter.py --import week1/members_v2.csv --search ragi --filter-land 2 --dues --export clean.json`
-- **API (W12):** `https://api.kubersetuos.app` (coming W12)
-- **App (W20):** `https://live.kubersetuos.app` (coming W20)
-- **Docs:** `KuberSetuOS/week1/README.md`
+**One-line wedge:** We help FPOs sell aggregated crops to verified buyers at better execution terms — price+quality+truck+payment tracking — via WhatsApp voice Kannada
 
-## Cost / Latency / Eval Metrics (HR Signal)
-| Metric | W1 Baseline | W12 Target | W24 Target |
-|--------|-------------|------------|------------|
-| RAG Faithfulness | — | 0.62 | 0.85 |
-| Verified Profile ROC-AUC | 0.78 | 0.80 | 0.82 |
-| Cost per txn | — | ₹1.20 | <₹0.50 |
-| Latency (P95) | <100ms CLI | <2s API | <2s |
-| Offline queue retry success | 100% (2 dirty + 1 notfound) | 100% | 100% |
-| Members loaded | 8 | 1k | 10k FPOs |
+**How it works:**
+1. **FPO Secretary** imports members via CLI: `--import members.csv` or `--import-tally-zip tally.zip` (offline-first)
+2. **System** cleans data: handles duplicate id, missing land queued to `offline_queue`, CROP_CATEGORY dict (ragi→Millets), consent verified filter (DPDP), phone_hash not phone
+3. **Export** `clean.json` → becomes bureau input W20 for verified financial profile 0-100
+4. **Future weeks:** Quality grading photo + eWayBill + logistics + Bank AA payment tracking + dispute + fraud detection (circular trading graph + price outlier) + WhatsApp voice loop + IVR/SMS fallback + GGUF offline
+
+**Universal Village Ready:** 
+- Smartphone 4G → real-time
+- 2G / no internet 2 days → queued to `offline_queue.json` retry when internet comes
+- Feature phone → field officer proxy via CLI
+
+## Tech Stack
+
+**Week 1 (Current):**
+- Python 3.11+
+- CSV (DictReader) — Tally export compatibility
+- JSON — clean.json bureau input
+- argparse — CLI for field officer
+- hashlib / hash() — DPDP phone_hash
+- pytest — 5 tests
+
+**Upcoming Weeks:**
+- Pandas, FastAPI, SQLite
+- RAG: LangChain, FAISS / Pinecone, Embeddings
+- Vision: Photo grading, OCR
+- Voice: WhatsApp API, STT/TTS Kannada, IVR/SMS
+- Transaction: Bank Account Aggregator, eWayBill API
+- Fraud: NetworkX graph, price outlier
+- Offline: GGUF, llama.cpp
+- Deploy: Docker, Cloud
+
+## Why This Tech Stack
+
+| Tech | Why We Used It |
+|------|----------------|
+| **Python** | Easy for FPO field officers to read, huge ecosystem, works offline, no compilation needed in village laptop |
+| **CSV DictReader** | Tally exports CSV, secretary already has it, no need for Excel dependency, handles every village reality |
+| **JSON clean.json** | Bureau input W20 needs structured data, easy to share, language independent, becomes verified profile later |
+| **argparse** | Field officer can run `python starter.py --import members.csv --search ragi` without editing code, --help self-documenting |
+| **hash(phone) not phone** | DPDP Act 2023 — cannot store phone as plain text, hash for privacy, no Aadhaar storage |
+| **CROP_CATEGORY dict** | `{'ragi':'Millets',...}.get(crop.lower(),"Other")` handles caps RAGI and unknown tomato→Other, O(1) lookup |
+| **List comprehension + lambda** | `search_by_crop` list comp and `filter_land>2` lambda — Pythonic, fast, readable for small FPO 8-10k members |
+| **offline_queue list** | Every village without internet — don't crash on missing land or FileNotFound, queue row dict and retry later, JSON serializable |
+| **pytest** | 5 tests ensure load 8, ragi 3, land>2 4, consent 6, dues ₹3000, offline queue 2 dirty + 1 notfound, duplicate stays 8 |
+| **Sublime + GitHub Desktop** | No AI autocomplete — learn properly, GitHub Desktop helps commit without git+vim complexity |
 
 ## Weekly Progress — Auto-Updating
 
-This section is auto-updated by `python scripts/update_readme.py` on every push via GitHub Action.
+This table is auto-updated by `python scripts/update_readme.py`. It scans `week1..week24` folders for code + tests.
 
 <!-- WEEKLY_PROGRESS_START -->
-| Week | Theme | Version | Skills | Status | Detail | Deliverable |
-|------|-------|---------|--------|--------|--------|-------------|
-| W01 | FPO Member Organizer CLI | V14 Foundation | Python, OOP, argparse, CSV, DPDP phone_hash, offline_queue | ✅ DONE | 8 members | clean.json bureau W20 ✅ |
-| W02 | Verified Financial Profile 0-100 | V14 Foundation | Pandas, Scoring, ROC-AUC 0.78, PDF shareable | ⬜ Not Started | — | profile 0-100 + PDF |
-| W03 | Quality Grading Photo + eWayBill | V14 Foundation | Vision, OCR, eWayBill API, Logistics | ⬜ Not Started | — | grading + eWayBill json |
-| W04 | WhatsApp Voice Kannada + IVR/SMS | V15 RAG Core | WhatsApp API, STT/TTS Kannada, IVR, SMS fallback | ⬜ Not Started | — | voice bot demo |
-| W05 | Transaction 1% + Payment Tracking | V15 RAG Core | Bank AA, Payment tracking, Dispute, FastAPI | ⬜ Not Started | — | transaction API |
-| W06 | Scheme RAG + Compliance RAG (Prototype) | V15 RAG Core | RAG, Pinecone/FAISS, LangChain, Embeddings | ⬜ Not Started | — | RAG prototype |
-| W07 | VectorDB + Cost/Latency Metrics | V15 RAG Core | Pinecone, FAISS, Cost modeling, Latency | ⬜ Not Started | — | cost/latency dashboard |
-| W08 | Fraud Detection Graph + Price Outlier | V16 Transaction | Graph DB, Circular trading, Price outlier, NetworkX | ⬜ Not Started | — | fraud graph + outlier |
-| W09 | RAG Eval Faithfulness 0.62→0.85 | V16 Transaction | Eval literacy, Faithfulness, RAGAS | ⬜ Not Started | — | eval report 0.85 |
-| W10 | Tool Calling + 3 MCPs Wedge | V16 Transaction | Tool calling, MCP, Function calling, 3 MCPs wedge | ⬜ Not Started | — | MCP server + tools |
-| W11 | CrewAI Hidden 3 Agents + LangChain | V16 Transaction | CrewAI, LangChain, Agents, Orchestration | ⬜ Not Started | — | 3 agents hidden flow |
-| W12 | FastAPI + Docker + Cloud | V16 Transaction | FastAPI, Docker, Cloud, K8s basics | ⬜ Not Started | — | API live URL |
-| W13 | GGUF Offline + On-device | V17 Scale | GGUF, llama.cpp, Offline inference, Quantization | ⬜ Not Started | — | offline GGUF model |
-| W14 | MLOps + PyTorch/HF + Monitoring | V17 Scale | PyTorch, HF, MLOps, Monitoring | ⬜ Not Started | — | MLOps pipeline |
-| W15 | SQL + DSA + Scale | V17 Scale | SQL, DSA, Indexing, Caching | ⬜ Not Started | — | scale test 10k FPOs |
-| W16 | WhatsApp Executable Transaction Loop | V17 Scale | WhatsApp, Farmer SMS loop, Execution terms | ⬜ Not Started | — | end-to-end txn |
-| W17 | Verified Buyer + Trust Score | V17 Scale | Trust score, Buyer verification, PDF | ⬜ Not Started | — | buyer verification |
-| W18 | Cost Optimization + Latency <2s | V17 Scale | Cost modeling, Latency, Caching, Batching | ⬜ Not Started | — | cost <₹0.50/txn |
-| W19 | Security + DPDP + Audit | V17 Scale | DPDP, Security, Audit logs | ⬜ Not Started | — | DPDP audit report |
-| W20 | Live URLs + Demo + Pitch | V17 Scale | Live URL, Demo, Pitch deck | ⬜ Not Started | — | live.kubersetuos.app |
-| W21 | HR Story 15-25 LPA + Resume | V17 Scale | HR story, Resume, Portfolio | ⬜ Not Started | — | HR pitch + resume |
-| W22 | Interview Prep + System Design | V17 Scale | System design, Agentic AI, RAG design | ⬜ Not Started | — | system design doc |
-| W23 | Final Polish + Metrics | V17 Scale | Metrics, Faithfulness 0.85, ROC-AUC 0.78 | ⬜ Not Started | — | metrics dashboard |
-| W24 | Launch + Monetization 1% | V17 Scale | Monetization, GTM, KVK CAC ₹2k | ⬜ Not Started | — | 1% txn live |
+| Week | Theme | Status | Detail | Deliverable |
+|------|-------|--------|--------|-------------|
+| W01 | FPO Member Organizer CLI | ✅ DONE | 8 members | clean.json bureau W20 ✅ |
+| W02 | Verified Financial Profile 0-100 | ⬜ Not Started | — | profile 0-100 + PDF |
+| W03 | Quality Grading Photo + eWayBill | ⬜ Not Started | — | grading + eWayBill json |
+| W04 | WhatsApp Voice Kannada + IVR/SMS | ⬜ Not Started | — | voice bot demo |
+| W05 | Transaction + Payment Tracking | ⬜ Not Started | — | transaction API |
+| W06 | Scheme RAG + Compliance RAG | ⬜ Not Started | — | RAG prototype |
+| W07 | VectorDB + Cost/Latency | ⬜ Not Started | — | cost/latency dashboard |
+| W08 | Fraud Detection Graph | ⬜ Not Started | — | fraud graph |
+| W09 | RAG Eval Faithfulness | ⬜ Not Started | — | eval report |
+| W10 | Tool Calling + MCPs | ⬜ Not Started | — | MCP server |
+| W11 | CrewAI Agents | ⬜ Not Started | — | 3 agents flow |
+| W12 | FastAPI + Docker + Cloud | ⬜ Not Started | — | API live URL |
+| W13 | GGUF Offline | ⬜ Not Started | — | offline model |
+| W14 | MLOps + Monitoring | ⬜ Not Started | — | MLOps pipeline |
+| W15 | SQL + Scale | ⬜ Not Started | — | scale test 10k |
+| W16 | WhatsApp Transaction Loop | ⬜ Not Started | — | end-to-end txn |
+| W17 | Verified Buyer + Trust | ⬜ Not Started | — | buyer verification |
+| W18 | Cost Optimization | ⬜ Not Started | — | cost <₹0.50/txn |
+| W19 | Security + DPDP Audit | ⬜ Not Started | — | audit report |
+| W20 | Live URLs + Demo | ⬜ Not Started | — | live app |
+| W21 | Polish + Docs | ⬜ Not Started | — | docs |
+| W22 | System Design | ⬜ Not Started | — | design doc |
+| W23 | Final Metrics | ⬜ Not Started | — | metrics dashboard |
+| W24 | Launch + 1% Monetization | ⬜ Not Started | — | 1% txn live |
 
-**Progress: 1/24 weeks (4.2%) | Last Updated: 2026-10-04 14:36 IST | Auto-updated by `scripts/update_readme.py`**
+**Progress: 1/24 weeks (4.2%) | Last Updated: 2026-10-04 14:46 IST | Auto-updated by `scripts/update_readme.py`**
 
 <!-- WEEKLY_PROGRESS_END -->
 
+## How to Run
+
+### Week 1 Demo (No Args)
+```bash
+cd week1
+python starter.py
+```
+Expected:
+```
+✅ Loaded 8 members, 0 queued offline
+Loaded 8 members
+Search ragi: 3
+Land>2: 4
+Consent: 6
+Dues: ₹3000.0
+RAGI -> Millets, tomato -> Other
+Exported 8 to clean.json — bureau input W20
+```
+
+### CLI for Field Officer
+```bash
+python starter.py --import members_v2.csv --search ragi --filter-land 2 --dues --export clean.json
+python starter.py --import members_v2.csv --search RAGI
+python starter.py --import dirty.csv
+python starter.py --import notfound.csv
+python starter.py --import-tally-zip tally.zip --export clean.json
+```
+
+### Run Tests
+```bash
+pip install pytest
+pytest -v
+# 5 passed
+```
+
+### Update README Tracker
+```bash
+python scripts/update_readme.py
+# or
+python update_readme.py
+```
+
 ## How Auto-Update Works
-1. **Script:** `scripts/update_readme.py` scans `week1..week24` and `KuberSetuOS/week*` for `starter.py`, `test_*.py`, `clean.json`, `README.md`
-2. **Status logic:** 
-   - No folder → ⬜ Not Started
-   - Has code → 🟡 In Progress
-   - Has code + tests → ✅ DONE
-3. **Markers:** Updates only between `<!-- WEEKLY_PROGRESS_START -->` and `
+
+1. Script `scripts/update_readme.py` scans `week1..week24` and `KuberSetuOS/week*` for `starter.py`, `test_*.py`, `clean.json`
+2. Status: No folder = Not Started, Has code = In Progress, Has code + tests = DONE
+3. It updates only between the special markers in this README (do not delete them)
+4. Auto on push: `.github/workflows/update-readme.yml` runs on every push to main
+
+---
+
+**Writer:** Venkateswaran A G  
+**Project:** KuberSetuOS — Wealth Bridge OS for Every Village  
+**Location:** Bengaluru, Karnataka, IN
