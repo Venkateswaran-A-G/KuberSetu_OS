@@ -21,26 +21,40 @@ class FPOManager:
     self.offline_queue = []
 
   def load_csv(self, filepath):
-    import csv 
-    with open(filepath,'r') as file:
-      reader = csv.DictReader(file)
-      for row in reader:
-        m = FPOMember(
-          int(row["id"]),
-          row["name"],
-          float(row["land_acre"]),
-          row['crop'],
-          row["phone"],
-          row["join_date"],
-          float(row["dues"]),
-          row["consent_otp_verified"]
-          )
-        self.add_member(m)
+    import csv
+    try:
+      with open(filepath,'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+          if row["land_acre"] =="":
+            self.display_error_message("Number of Land Acre",row["id"])
+            self.offline_queue.append(row)
+            continue
+          if row["phone"] == "":
+            self.display_error_message("Phone Number",row["id"])
+            self.offline_queue.append(row)
+            continue
+          m = FPOMember(
+            int(row["id"]),
+            row["name"],
+            float(row["land_acre"]),
+            row['crop'],
+            row["phone"],
+            row["join_date"],
+            float(row["dues"]),
+            row["consent_otp_verified"]
+            )
+          self.add_member(m)
+    except FileNotFoundError:
+      print("No Internet. The file is added to offline queue.")
+      self.offline_queue.append({"filepath":filepath,"error":"not found"})
+      
 
   def add_member(self,member):
     for i in self.members:
       if i.id == member.id:
         print("WARNING: Duplicate Member Id:",member.id," Found.")
+        self.offline_queue.append({"id":member.id,"error":"duplicate"})
         return
     self.members.append(member)
 
@@ -52,10 +66,10 @@ class FPOManager:
     return total_dues
 
   def search_by_crop(self,crop):
-    return [m for m in self.members if m.crop == crop]
+    return [m for m in self.members if m.crop.lower() == crop.lower()]
 
   def filter_consent_verified(self):
-    return [m for m in self.members if m.consent_otp_verified == "True"]
+    return [m for m in self.members if str(m.consent_otp_verified).lower() == "true"]
 
   def filter_land_greater_than_2_acres(self):
     return [m for m in self.members if m.land_acre>2]
@@ -63,23 +77,25 @@ class FPOManager:
   def get_crop_category(self,crop):
     return CROP_CATEGORY.get(crop.lower(),"Other")
 
-    def export_clean_json(self, filepath):
-      import json
-      clean = []
-      for m in self.members:
-          clean.append({
-              "id": m.id,
-              "name": m.name,
-              "land_acre": m.land_acre,
-              "crop": m.crop,
-              "phone_hash": hash(m.phone),  # DPDP: hash not phone
-              "join_date": m.join_date,
-              "dues": m.dues,
-              "consent_otp_verified": m.consent_otp_verified
-          })
-      with open(filepath, 'w') as f:
-          json.dump(clean, f, indent=2)
-      print(f"Exported {len(clean)} to {filepath} — bureau input W20")
+  def export_clean_json(self, filepath):
+    import json
+    clean = []
+    for m in self.members:
+        clean.append({
+            "id": m.id,
+            "name": m.name,
+            "land_acre": m.land_acre,
+            "crop": m.crop,
+            "phone_hash": hash(m.phone), 
+            "join_date": m.join_date,
+            "dues": m.dues,
+            "consent_otp_verified": m.consent_otp_verified
+        })
+    with open(filepath, 'w') as f:
+      json.dump(clean, f, indent=2)
+    print(f"Exported {len(clean)} to {filepath} — bureau input W20")
+  def display_error_message(self,fieldName,memberID):
+    print("Error:",fieldName," is missing/invalid of id:",memberID)
 
 if __name__ == "__main__":
   import argparse
@@ -93,6 +109,12 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   manager = FPOManager()
+
+  if args.import_file:
+    manager.load_csv(args.import_file)
+
+  if args.tally_zip:
+    manager.load_csv(args.tally_zip)
 
   if args.search:
     results = manager.search_by_crop(args.search)
